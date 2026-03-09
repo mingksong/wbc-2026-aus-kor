@@ -1,4 +1,4 @@
-import { AUS_PITCHERS } from '../data/ausPitchData';
+import { AUS_PITCHERS, AUS_PITCHES } from '../data/ausPitchData';
 
 interface PitcherSelectorProps {
   selected: string | null;
@@ -38,7 +38,7 @@ export default function PitcherSelector({ selected, onSelect }: PitcherSelectorP
       >
         전체
         <span className={`ml-1 text-[10px] ${selected === null ? 'text-emerald-200' : 'text-slate-500'}`}>
-          (244)
+          ({AUS_PITCHES.length})
         </span>
       </button>
     </div>

@@ -30,7 +30,7 @@ export default function App() {
             </h1>
           </div>
           <p className="text-xs text-slate-400 ml-11">
-            Pool C | vs Chinese Taipei (W 3-0) | vs Czechia (W 5-1) | 총 244구
+            Pool C | vs Chinese Taipei (W 3-0) | vs Czechia (W 5-1) | vs Japan (L 3-4) | 총 396구
           </p>
         </div>
       </header>

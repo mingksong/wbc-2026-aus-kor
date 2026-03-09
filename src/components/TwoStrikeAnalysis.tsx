@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { AusPitch } from '../data/ausPitchData';
 import { PITCH_COLORS, PITCH_NAMES_KR, getResultColor } from '../utils/pitchColors';
+
+type BatSideFilter = 'ALL' | 'L' | 'R';
 
 interface TwoStrikeAnalysisProps {
   pitches: AusPitch[];
@@ -262,8 +265,18 @@ function TwoStrikePitchMap({ pitches }: { pitches: AusPitch[] }) {
   );
 }
 
+const BAT_SIDE_TABS: { value: BatSideFilter; label: string }[] = [
+  { value: 'ALL', label: '전체' },
+  { value: 'L', label: 'vs 좌타' },
+  { value: 'R', label: 'vs 우타' },
+];
+
 export default function TwoStrikeAnalysis({ pitches }: TwoStrikeAnalysisProps) {
+  const [batSideFilter, setBatSideFilter] = useState<BatSideFilter>('ALL');
   const twoStrikePitches = pitches.filter(p => p.strikes === 2);
+  const filtered = batSideFilter === 'ALL'
+    ? twoStrikePitches
+    : twoStrikePitches.filter(p => p.batSide === batSideFilter);
 
   if (twoStrikePitches.length === 0) {
     return (
@@ -275,24 +288,57 @@ export default function TwoStrikeAnalysis({ pitches }: TwoStrikeAnalysisProps) {
 
   return (
     <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50">
-      <h3 className="text-sm font-semibold text-slate-200 mb-4">
-        2스트라이크 결정구 분석
-        <span className="text-slate-500 font-normal ml-2">
-          ({twoStrikePitches.length}구 / 전체 {pitches.length}구)
-        </span>
-      </h3>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Pitch map */}
-        <div className="flex justify-center">
-          <TwoStrikePitchMap pitches={twoStrikePitches} />
-        </div>
-        {/* Right: Analysis */}
-        <div className="space-y-5">
-          <PitchTypeDistribution pitches={twoStrikePitches} />
-          <ZoneHeatmap pitches={twoStrikePitches} />
-          <PutawayResults pitches={twoStrikePitches} />
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h3 className="text-sm font-semibold text-slate-200">
+          2스트라이크 결정구 분석
+          <span className="text-slate-500 font-normal ml-2">
+            ({filtered.length}구 / 전체 {pitches.length}구)
+          </span>
+        </h3>
+        {/* Bat side toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-slate-700">
+          {BAT_SIDE_TABS.map(tab => {
+            const count = tab.value === 'ALL'
+              ? twoStrikePitches.length
+              : twoStrikePitches.filter(p => p.batSide === tab.value).length;
+            const isActive = batSideFilter === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setBatSideFilter(tab.value)}
+                className={`px-3 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-1 text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-500'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
+      {filtered.length === 0 ? (
+        <div className="text-center text-slate-500 text-sm py-4">
+          해당 조건의 데이터 없음
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: Pitch map */}
+          <div className="flex justify-center">
+            <TwoStrikePitchMap pitches={filtered} />
+          </div>
+          {/* Right: Analysis */}
+          <div className="space-y-5">
+            <PitchTypeDistribution pitches={filtered} />
+            <ZoneHeatmap pitches={filtered} />
+            <PutawayResults pitches={filtered} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

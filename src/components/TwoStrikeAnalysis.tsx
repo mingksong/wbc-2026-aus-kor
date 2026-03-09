@@ -43,7 +43,7 @@ function ZoneHeatmap({ pitches }: { pitches: AusPitch[] }) {
   // Zone boundaries
   const xThird = (SZ_HALF * 2) / 3;
   const grid = Array.from({ length: 3 }, () => Array.from({ length: 3 }, () => 0));
-  // grid[row][col]: row=0 HIGH, row=2 LOW; col=0 IN(pitcher arm side), col=2 OUT
+  // grid[row][col]: row=0 HIGH, row=2 LOW; col=0 LEFT(pitcher view), col=2 RIGHT(pitcher view)
 
   for (const p of pitches) {
     // Vertical zone
@@ -52,12 +52,12 @@ function ZoneHeatmap({ pitches }: { pitches: AusPitch[] }) {
     else if (p.pZ >= avgSzBot + thirdH) row = 1; // CENTER
     else row = 2; // LOW
 
-    // Horizontal zone (use raw pX since we'll label relative to general location)
-    const px = p.pX;
+    // Horizontal zone (pitcher's view: mirror pX)
+    const px = p.pX * -1;
     let col: number;
-    if (px <= -xThird) col = 0; // IN (catcher's left = pitcher's right)
-    else if (px <= xThird) col = 1; // MID
-    else col = 2; // OUT
+    if (px <= -xThird) col = 0;
+    else if (px <= xThird) col = 1;
+    else col = 2;
 
     if (row >= 0 && row < 3 && col >= 0 && col < 3) {
       grid[row][col]++;
@@ -66,7 +66,7 @@ function ZoneHeatmap({ pitches }: { pitches: AusPitch[] }) {
 
   const maxCount = Math.max(...grid.flat(), 1);
   const rowLabels = ['HIGH', 'CENTER', 'LOW'];
-  const colLabels = ['IN', 'MID', 'OUT'];
+  const colLabels = ['L', 'MID', 'R'];
 
   return (
     <div>
